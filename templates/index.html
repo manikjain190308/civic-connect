@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <h1>Civic <em>Connect</em></h1>
+    <div class="tagline">Your <b>city</b>. Your <b>voice</b>. Your <b>change</b>.</div>
+    <p class="section-sub" style="max-width:460px">One platform. Shared accountability. Report local problems and watch them move from report to resolution.</p>
+    <div class="hero-cta" style="margin-top:22px">
+      {% if g.user and g.user.role == 'user' %}
+        <a class="btn solid" href="{{ url_for('report') }}">Raise a Complaint</a>
+      {% elif not g.user %}
+        <a class="btn solid" href="{{ url_for('report') }}">Raise a Complaint</a>
+        <a class="btn" href="{{ url_for('login', role='admin') }}">Official Login</a>
+      {% else %}
+        <a class="btn solid" href="{{ url_for('admin_panel') }}">Go to Admin Panel</a>
+      {% endif %}
+      <a class="btn" href="#complaints">View Open Issues</a>
+    </div>
+  </div>
+  <div class="hero-art">
+    <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="City skyline connected by a network">
+      <defs>
+        <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c5a2c"/><stop offset="1" stop-color="#051a0c"/></linearGradient>
+      </defs>
+      <g fill="url(#gl)" stroke="#3fd35a" stroke-opacity=".55">
+        <rect x="30" y="170" width="46" height="160"/><rect x="86" y="120" width="52" height="210"/>
+        <rect x="150" y="190" width="40" height="140"/><rect x="200" y="80" width="58" height="250"/>
+        <polygon points="268,330 268,60 300,30 332,60 332,330"/><rect x="342" y="140" width="50" height="190"/>
+        <rect x="402" y="100" width="56" height="230"/><rect x="470" y="170" width="44" height="160"/><rect x="522" y="130" width="48" height="200"/>
+      </g>
+      <g fill="#7dff3a" opacity=".75">
+        <rect x="100" y="150" width="6" height="8"/><rect x="116" y="180" width="6" height="8"/><rect x="214" y="110" width="6" height="8"/>
+        <rect x="232" y="150" width="6" height="8"/><rect x="288" y="90" width="6" height="8"/><rect x="304" y="130" width="6" height="8"/>
+        <rect x="416" y="130" width="6" height="8"/><rect x="434" y="180" width="6" height="8"/><rect x="536" y="160" width="6" height="8"/>
+      </g>
+      <polygon points="140,330 140,290 300,262 460,290 460,330" fill="#0c2a16" stroke="#5cff1a" stroke-opacity=".6"/>
+      <g fill="#5cff1a" opacity=".5"><rect x="170" y="296" width="8" height="34"/><rect x="210" y="292" width="8" height="38"/><rect x="250" y="288" width="8" height="42"/><rect x="342" y="288" width="8" height="42"/><rect x="382" y="292" width="8" height="38"/><rect x="422" y="296" width="8" height="34"/></g>
+      <g stroke="#5cff1a" stroke-width="1.4" opacity=".8" fill="none">
+        <polyline points="60,300 160,250 260,310 330,230 420,300 500,240 560,300"/>
+        <polyline points="110,340 200,280 300,350 400,270 520,340"/>
+      </g>
+      <g fill="#b8f26b">
+        <circle cx="160" cy="250" r="5"/><circle cx="260" cy="310" r="5"/><circle cx="330" cy="230" r="6"/>
+        <circle cx="420" cy="300" r="5"/><circle cx="500" cy="240" r="5"/><circle cx="200" cy="280" r="4"/><circle cx="400" cy="270" r="4"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- LIVE DASHBOARD (public) -->
+<section class="section" id="dashboard">
+  <h2 class="section-title">Live Dashboard</h2>
+  <p class="section-sub">Area-wise status of every issue. No login needed.</p>
+  <div class="divider"></div>
+  <div class="stats">
+    <div class="card stat open"><div class="num" data-count="{{ stats.Open }}">{{ stats.Open }}</div><div class="lbl">Open</div><div class="sub">Awaiting action</div></div>
+    <div class="card stat pending"><div class="num" data-count="{{ stats.Pending }}">{{ stats.Pending }}</div><div class="lbl">Pending</div><div class="sub">Work in progress</div></div>
+    <div class="card stat resolved"><div class="num" data-count="{{ stats.Resolved }}">{{ stats.Resolved }}</div><div class="lbl">Resolved</div><div class="sub">Issue fixed</div></div>
+    <div class="card stat total"><div class="num" data-count="{{ stats.Total }}">{{ stats.Total }}</div><div class="lbl">Total Reports</div><div class="sub">All time</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <h2 class="section-title">How It Works</h2>
+  <p class="section-sub">From reporting a problem to tracking its resolution.</p>
+  <div class="divider"></div>
+  <div class="flow">
+    <div class="step"><span class="ico">🔐</span>Choose Login<br>Citizen / Admin</div>
+    <div class="step"><span class="ico">📸</span>Raise Complaint<br>Photo + Location</div>
+    <div class="step"><span class="ico">📊</span>Public Complaint<br>Dashboard</div>
+    <div class="step"><span class="ico">🔄</span>Official Updates<br>Complaint Status</div>
+    <div class="step"><span class="ico">✅</span>Transparent<br>Resolution</div>
+  </div>
+</section>
+
+<!-- COMPLAINTS -->
+<section class="section" id="complaints">
+  <h2 class="section-title">Issues In Your Area</h2>
+  <p class="section-sub">Browse, follow and discuss local problems.</p>
+  <div class="divider"></div>
+
+  <form class="filters" method="get" action="{{ url_for('index') }}#complaints">
+    <input type="search" name="q" placeholder="Search issues…" value="{{ f_q }}">
+    <select name="locality">
+      <option value="">All localities</option>
+      {% for l in localities %}<option value="{{ l }}" {{ 'selected' if l == f_locality }}>{{ l }}</option>{% endfor %}
+    </select>
+    <select name="status">
+      <option value="">All statuses</option>
+      {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == f_status }}>{{ s }}</option>{% endfor %}
+    </select>
+    <button class="btn solid" type="submit">Filter</button>
+  </form>
+
+  {% if complaints %}
+  <div class="grid">
+    {% for c in complaints %}
+    <a href="{{ url_for('complaint', cid=c.id) }}" class="card c-card" style="color:inherit">
+      <div class="img" style="background-image:url('{{ url_for('static', filename='uploads/' ~ c.photo) }}')">
+        <span class="badge {{ c.status }}">{{ c.status }}</span>
+      </div>
+      <div class="body">
+        <h3>{{ c.title }}</h3>
+        <p>{{ c.description[:110] }}{{ '…' if c.description|length > 110 }}</p>
+        <div class="meta">
+          <span>📍 {{ c.locality }}</span><span>🏷 {{ c.category }}</span>
+          <span>💬 {{ c.n_comments }}</span><span>🕒 {{ c.created_at|dt }}</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="card empty">No issues found. Be the first to <a href="{{ url_for('report') }}">raise one</a>.</div>
+  {% endif %}
+</section>
+{% endblock %}

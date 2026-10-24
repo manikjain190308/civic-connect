@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <h2 class="section-title" style="font-size:2.2rem">Login</h2>
+  <p class="section-sub">Choose your login type.</p>
+  <div class="divider"></div>
+  <div class="card form-card">
+    <div class="tabs">
+      <a href="{{ url_for('login', role='user', next=request.args.get('next')) }}" class="{{ 'active' if role == 'user' }}">Citizen</a>
+      <a href="{{ url_for('login', role='admin', next=request.args.get('next')) }}" class="{{ 'active' if role == 'admin' }}">Admin / Official</a>
+    </div>
+    <form method="post" action="{{ url_for('login', role=role, next=request.args.get('next')) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" required autocomplete="username">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required autocomplete="current-password">
+      <button class="btn solid" style="width:100%;margin-top:22px" type="submit">
+        Login as {{ 'Official' if role == 'admin' else 'Citizen' }}
+      </button>
+    </form>
+    {% if role == 'user' %}
+      <p class="hint" style="margin-top:16px">New here? <a href="{{ url_for('register') }}">Create a citizen account</a></p>
+    {% else %}
+      <p class="hint" style="margin-top:16px">Official accounts are created by the system administrator.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

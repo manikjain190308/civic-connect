@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+<section class="section">
+  <h2 class="section-title">Admin Dashboard</h2>
+  <p class="section-sub">Review complaints and set their current status.</p>
+  <div class="divider"></div>
+
+  <div class="stats" style="margin-bottom:26px">
+    <div class="card stat open"><div class="num">{{ stats.Open }}</div><div class="lbl">Open</div></div>
+    <div class="card stat pending"><div class="num">{{ stats.Pending }}</div><div class="lbl">Pending</div></div>
+    <div class="card stat resolved"><div class="num">{{ stats.Resolved }}</div><div class="lbl">Resolved</div></div>
+    <div class="card stat total"><div class="num">{{ stats.Total }}</div><div class="lbl">Total</div></div>
+  </div>
+
+  <div class="tabs" style="max-width:520px">
+    <a href="{{ url_for('admin_panel') }}" class="{{ 'active' if not f_status }}">All</a>
+    {% for s in statuses %}<a href="{{ url_for('admin_panel', status=s) }}" class="{{ 'active' if f_status == s }}">{{ s }}</a>{% endfor %}
+  </div>
+
+  <div class="card table-wrap">
+    {% if complaints %}
+    <table>
+      <thead><tr><th>#</th><th>Photo</th><th>Issue</th><th>Locality</th><th>Status</th><th>Update status</th></tr></thead>
+      <tbody>
+      {% for c in complaints %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td><img class="thumb" src="{{ url_for('static', filename='uploads/' ~ c.photo) }}" alt=""></td>
+        <td><a href="{{ url_for('complaint', cid=c.id) }}"><b>{{ c.title }}</b></a>
+          <div class="hint">{{ c.category }} · by {{ c.author }} · {{ c.created_at|dt }}</div></td>
+        <td>{{ c.locality }}</td>
+        <td><span class="badge {{ c.status }}">{{ c.status }}</span></td>
+        <td>
+          <form method="post" action="{{ url_for('set_status', cid=c.id) }}">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <select name="status">{% for s in statuses %}<option {{ 'selected' if s == c.status }}>{{ s }}</option>{% endfor %}</select>
+            <input name="remark" maxlength="500" placeholder="Remark (public)">
+            <button class="btn small solid" type="submit">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty">No complaints in this view.</div>{% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ c.title }}{% endblock %}
+{% block content %}
+<section class="section">
+  <p><a href="{{ url_for('index') }}#complaints">← Back to all issues</a></p>
+  <div class="detail">
+    <div>
+      <div class="card">
+        <img class="photo" src="{{ url_for('static', filename='uploads/' ~ c.photo) }}" alt="Photo of: {{ c.title }}">
+        <h1>{{ c.title }}</h1>
+        <div class="meta" style="margin-bottom:14px">
+          <span class="badge {{ c.status }}">{{ c.status }}</span>
+          <span>#{{ c.id }}</span><span>🏷 {{ c.category }}</span>
+          <span>👤 {{ c.author }}</span><span>🕒 {{ c.created_at|dt }}</span>
+        </div>
+        <p class="desc">{{ c.description }}</p>
+        <p><b>📍 {{ c.locality }}</b> — {{ c.address }}</p>
+        {% if c.latitude is not none and c.longitude is not none %}
+          {% set lat = c.latitude|float %}{% set lon = c.longitude|float %}
+          <iframe class="map-frame" loading="lazy" title="Map of the site"
+            src="https://www.openstreetmap.org/export/embed.html?bbox={{ lon - 0.004 }}%2C{{ lat - 0.003 }}%2C{{ lon + 0.004 }}%2C{{ lat + 0.003 }}&amp;layer=mapnik&amp;marker={{ lat }}%2C{{ lon }}"></iframe>
+          <p class="hint"><a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat={{ lat }}&amp;mlon={{ lon }}#map=17/{{ lat }}/{{ lon }}">Open larger map ↗</a></p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <h2 class="sec">Resolution tracking</h2>
+        <ul class="timeline">
+          {% for h in history %}
+          <li><span class="badge {{ h.status }}">{{ h.status }}</span> by {{ h.admin_name }}
+            <div class="hint">{{ h.created_at|dt }}</div>
+            {% if h.remark %}<div style="margin-top:4px">{{ h.remark }}</div>{% endif %}
+          </li>
+          {% endfor %}
+          <li><span class="badge Open">Open</span> Complaint raised
+            <div class="hint">{{ c.created_at|dt }}</div></li>
+        </ul>
+
+        {% if g.user and g.user.role == 'admin' %}
+        <form method="post" action="{{ url_for('set_status', cid=c.id) }}" style="margin-top:8px">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="back" value="{{ url_for('complaint', cid=c.id) }}">
+          <label>Update status</label>
+          <select name="status">{% for s in statuses %}<option {{ 'selected' if s == c.status }}>{{ s }}</option>{% endfor %}</select>
+          <input name="remark" maxlength="500" placeholder="Remark visible to the public (optional)" style="margin-top:8px">
+          <button class="btn solid small" style="margin-top:10px" type="submit">Save status</button>
+        </form>
+        {% endif %}
+      </div>
+
+      <div class="card" id="comments">
+        <h2 class="sec">Community discussion ({{ comments|length }})</h2>
+        {% for cm in comments %}
+        <div class="comment">
+          <span class="who">{{ cm.name }}</span>{% if cm.role == 'admin' %}<span class="official">OFFICIAL</span>{% endif %}
+          <span class="when">{{ cm.created_at|dt }}</span>
+          <p>{{ cm.body }}</p>
+        </div>
+        {% else %}
+        <p class="hint">No comments yet. Add details or show your support.</p>
+        {% endfor %}
+
+        {% if g.user %}
+        <form method="post" action="{{ url_for('add_comment', cid=c.id) }}" style="margin-top:14px">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <textarea name="body" required maxlength="1000" placeholder="Add a comment…" style="min-height:80px"></textarea>
+          <button class="btn solid small" style="margin-top:10px" type="submit">Post comment</button>
+        </form>
+        {% else %}
+        <p class="hint" style="margin-top:14px"><a href="{{ url_for('login', role='user', next=request.path) }}">Login</a> to join the discussion.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

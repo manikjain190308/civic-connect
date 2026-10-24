@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block content %}
+<section class="error-page">
+  <p class="code">{{ code }}</p>
+  <h2 class="section-title" style="font-size:1.6rem">{{ message }}</h2>
+  <p style="margin-top:24px"><a class="btn solid" href="{{ url_for('index') }}">Back to home</a></p>
+</section>
+{% endblock %}

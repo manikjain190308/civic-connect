@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Raise a Complaint{% endblock %}
+{% block content %}
+<section class="section narrow" style="width:min(720px,100%)">
+  <h2 class="section-title">Raise a Complaint</h2>
+  <p class="section-sub">Describe the problem, add a photo and the site location.</p>
+  <div class="divider"></div>
+  <div class="card form-card">
+    <form method="post" enctype="multipart/form-data" id="reportForm">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+      <label for="title">Problem title</label>
+      <input id="title" name="title" required maxlength="150" placeholder="e.g. Deep pothole near main market" value="{{ form.get('title', '') }}">
+
+      <div class="row2">
+        <div>
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Choose…</option>
+            {% for c in categories %}<option value="{{ c }}" {{ 'selected' if form.get('category') == c }}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="locality">Locality / area</label>
+          <input id="locality" name="locality" required maxlength="100" value="{{ form.get('locality') or g.user.locality or '' }}">
+        </div>
+      </div>
+
+      <label for="description">Brief description</label>
+      <textarea id="description" name="description" required maxlength="2000" placeholder="What is the problem? Since when? How does it affect residents?">{{ form.get('description', '') }}</textarea>
+
+      <label for="photo">Photo of the problem <span class="hint">(required · JPG / PNG / WEBP · max 6 MB)</span></label>
+      <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
+      <img id="preview" alt="Selected photo preview">
+      <p class="hint">Photos taken with location enabled are also used to detect the site location automatically.</p>
+
+      <label for="address">Site location / landmark</label>
+      <input id="address" name="address" required maxlength="255" placeholder="Street, landmark or nearby shop" value="{{ form.get('address', '') }}">
+      <input type="hidden" name="latitude" id="latitude" value="{{ form.get('latitude', '') }}">
+      <input type="hidden" name="longitude" id="longitude" value="{{ form.get('longitude', '') }}">
+      <div class="loc-box">
+        <button type="button" class="btn small" id="locBtn">📍 Use my current location</button>
+        <span id="locStatus"></span>
+      </div>
+
+      <button class="btn solid" style="width:100%;margin-top:26px" type="submit">Submit complaint</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
